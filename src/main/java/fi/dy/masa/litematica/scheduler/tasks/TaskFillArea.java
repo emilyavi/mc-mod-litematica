@@ -37,6 +37,7 @@ public class TaskFillArea extends TaskProcessChunkMultiPhase
     @Nullable protected final String replaceBlockString;
     protected final int maxBoxVolume;
     protected final boolean removeEntities;
+    protected final boolean ignoreStateOfReplaced;
 
     public TaskFillArea(List<Box> boxes, BlockState fillState, @Nullable BlockState replaceState, boolean removeEntities)
     {
@@ -54,6 +55,7 @@ public class TaskFillArea extends TaskProcessChunkMultiPhase
         this.maxCommandsPerTick = Configs.Generic.COMMAND_LIMIT.getIntegerValue();
         this.fillCommand = Configs.Generic.COMMAND_NAME_FILL.getStringValue();
         this.blockString = BlockArgumentParser.stringifyBlockState(fillState);
+        this.ignoreStateOfReplaced = replaceState != null && Configs.Generic.REPLACE_MODE_IGNORE_STATE.getBooleanValue();
 
         if (replaceState != null)
         {
@@ -248,7 +250,6 @@ public class TaskFillArea extends TaskProcessChunkMultiPhase
 
         WorldUtils.setShouldPreventBlockUpdates(this.world, true);
 
-        BlockState barrier = Blocks.BARRIER.getDefaultState();
         BlockPos.Mutable posMutable = new BlockPos.Mutable();
 
         for (int z = box.minZ; z <= box.maxZ; ++z)
@@ -258,25 +259,30 @@ public class TaskFillArea extends TaskProcessChunkMultiPhase
                 for (int y = box.maxY; y >= box.minY; --y)
                 {
                     posMutable.set(x, y, z);
-                    BlockState oldState = this.world.getBlockState(posMutable);
-
-                    if ((this.replaceState == null && oldState != this.fillState) || oldState == this.replaceState)
-                    {
-                        BlockEntity te = this.world.getBlockEntity(posMutable);
-
-                        if (te instanceof Inventory)
-                        {
-                            ((Inventory) te).clear();
-                            this.world.setBlockState(posMutable, barrier, 0x32);
-                        }
-
-                        this.world.setBlockState(posMutable, this.fillState, 0x32);
-                    }
+                    this.replaceBlockDirect(posMutable, this.world.getBlockState(posMutable));
                 }
             }
         }
 
         WorldUtils.setShouldPreventBlockUpdates(this.world, false);
+    }
+
+    protected void replaceBlockDirect(BlockPos pos, BlockState oldState)
+    {
+        if ((this.replaceState == null && oldState != this.fillState) ||
+            oldState == this.replaceState ||
+            (this.ignoreStateOfReplaced && oldState.getBlock() == this.replaceState.getBlock()))
+        {
+            BlockEntity te = this.world.getBlockEntity(pos);
+
+            if (te instanceof Inventory)
+            {
+                ((Inventory) te).clear();
+                this.world.setBlockState(pos, Blocks.BARRIER.getDefaultState(), 0x32);
+            }
+
+            this.world.setBlockState(pos, this.fillState, 0x32);
+        }
     }
 
     protected void queueFillCommandsForBox(IntBoundingBox box, boolean removeEntities)
