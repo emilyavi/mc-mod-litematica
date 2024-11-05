@@ -4,6 +4,7 @@ import net.minecraft.block.AbstractBannerBlock;
 import net.minecraft.block.AbstractFireBlock;
 import net.minecraft.block.AbstractRedstoneGateBlock;
 import net.minecraft.block.AbstractSkullBlock;
+import net.minecraft.block.AttachedStemBlock;
 import net.minecraft.block.BannerBlock;
 import net.minecraft.block.BedBlock;
 import net.minecraft.block.Block;
@@ -13,6 +14,7 @@ import net.minecraft.block.ChorusPlantBlock;
 import net.minecraft.block.DoorBlock;
 import net.minecraft.block.FenceBlock;
 import net.minecraft.block.FenceGateBlock;
+import net.minecraft.block.GourdBlock;
 import net.minecraft.block.HorizontalConnectingBlock;
 import net.minecraft.block.NoteBlock;
 import net.minecraft.block.PaneBlock;
@@ -21,6 +23,7 @@ import net.minecraft.block.RepeaterBlock;
 import net.minecraft.block.SkullBlock;
 import net.minecraft.block.SnowyBlock;
 import net.minecraft.block.StairsBlock;
+import net.minecraft.block.StemBlock;
 import net.minecraft.block.TallPlantBlock;
 import net.minecraft.block.TripwireBlock;
 import net.minecraft.block.VineBlock;
@@ -171,7 +174,9 @@ public class SchematicConversionFixers
         return state;
     };
 
-    public static final IStateFixer FIXER_CHRORUS_PLANT = (reader, state, pos) -> ChorusPlantBlock.withConnectionProperties(reader, pos, state);
+    public static final IStateFixer FIXER_CHRORUS_PLANT = (reader, state, pos) -> {
+        return ((ChorusPlantBlock) state.getBlock()).withConnectionProperties(reader, pos);
+    };
 
     public static final IStateFixer FIXER_DIRT_SNOWY = (reader, state, pos) -> {
         Block block = reader.getBlockState(pos.up()).getBlock();
@@ -480,7 +485,6 @@ public class SchematicConversionFixers
     };
 
     public static final IStateFixer FIXER_STEM = (reader, state, pos) -> {
-        /* FIXME 1.20.3 - the gourd block and attached stem are now RegistryKey<Block>, plus they are private...
         StemBlock stem = (StemBlock) state.getBlock();
         GourdBlock crop = stem.getGourdBlock();
 
@@ -495,7 +499,6 @@ public class SchematicConversionFixers
                 return crop.getAttachedStem().getDefaultState().with(AttachedStemBlock.FACING, side);
             }
         }
-        */
 
         return state;
     };

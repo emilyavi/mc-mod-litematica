@@ -7,7 +7,6 @@ import javax.annotation.Nullable;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtList;
-import net.minecraft.nbt.NbtTagSizeTracker;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
@@ -97,7 +96,7 @@ public class NbtUtils
         {
             try
             {
-                nbt = NbtIo.readCompressed(is, NbtTagSizeTracker.ofUnlimitedBytes());
+                nbt = NbtIo.readCompressed(is);
             }
             catch (Exception e)
             {
@@ -105,7 +104,7 @@ public class NbtUtils
                 {
                     is.close();
                     is = new FileInputStream(file);
-                    nbt = NbtIo.read(file.toPath());
+                    nbt = NbtIo.read(file);
                 }
                 catch (Exception ignore) {}
             }
