@@ -208,7 +208,7 @@ public class SchematicProject
 
                 if (fileType == FileType.UNKNOWN)
                 {
-                    fileName += ".litematic";
+                    fileName += LitematicaSchematic.FILE_EXTENSION;
                     fileType = FileType.LITEMATICA_SCHEMATIC;
                 }
 
